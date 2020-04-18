@@ -13,3 +13,31 @@ If an evil artifact is forced onto you, chances are much greater that it’ll in
 Rings now give their intrinsics with 50% chance, amulets with 33%, unless they’re made of viva, in which case it’s 80%
 
 Bones stuffing has been denerfed: Items should no longer disappear and degrade, containers keep their contents, porky items remain porky, and the gauntlet key (which isn’t guaranteed to appear) now can be left in the bones pile. Additionally, the candelabrum left in bones now turns into a magic candle instead of an ordinary one.
+
+Pork'em Extended 1.0.1
+
+Wands of wonder now have an actual chance of granting a wish or great effect. They also explode 1 in 500 zaps instead of 1 in 100
+
+Cursed wands now explode 5% of the time instead of 20%
+
+Enchant weapon/armor spells now have a much greater chance of enchanting at higher skill levels
+
+Spell backlashes in general are much less frequent. 
+
+Removed the stupid gauge timer from one point shoot
+
+Spell of Switcheroo now still gives you a nastytrap effect, but for much less time and with much less backlash
+
+Trap disarming no longer screws you up
+
+Spell of wishing now will make you lose up to 100 max HP/Pw and 0-2 points in all stats. You still need to have 500 max HP/PW to cast it, though.
+
+Spell of acquirement will now make you lose up to 5 max HP/PW, and 5% chance of losing a point in each stat. You still need >100 max HP/PW to cast it, though.
+
+Occult spells now backlash a bit more often if unskilled, and much less often at higher skill levels, especially so for the occult master class.
+
+Spell of map level has been denerfed. It is now very porkish again. 
+
+Many spells have been tweaked, such as duration increases, or lesser penalties on HP/mana
+
+Reroll artifact will now let you reroll a worn artifact. What could possibly go wrong?

@@ -4971,7 +4971,7 @@ chargingchoice:
 			}
 			recharge(otmp, 1);
 			break;
-		case WAN_WONDER: /* supposed to have a random effect, may be implemented in future */
+		case WAN_WONDER: /* Chances of a wish or great effect now have an actual chance of happening -- porkman*/
 
 			known = TRUE;
 			switch(rnd(21)) {
@@ -4989,7 +4989,7 @@ chargingchoice:
 				break;
 			case 5 : 
 				pline("Multicolored sparks fly from the wand.");
-				if (!rn2(250)) {
+				if (!rn2(5)) {
 					if (!rn2(4)) makewish(TRUE);
 					else othergreateffect();
 				}
@@ -5172,8 +5172,8 @@ dozap()
 		return(1);
 	}
 
-	else if(obj->cursed && !rn2(5)) {
-		/* WAC made this rn2(5) from rn2(100)*/
+	else if(obj->cursed && !rn2(20)) {
+		/* WAC made this rn2(5) from rn2(100). Porkman then made it rn2(20) -- porkman */
 		backfire(obj);  /* the wand blows up in your face! */
 		exercise(A_STR, FALSE);
 		return(1);

@@ -171,7 +171,7 @@ spell_known(int sbook_id)
 	return(FALSE);
 }
 
-
+/* Greatly reduced backlash chances for most spells --Porkman */
 
 /* The roles[] table lists the role-specific values for tuning
  * percent_success().
@@ -3510,16 +3510,17 @@ boolean atme;
 
 castanyway:
 
-	/* come on, you should be able to cast using less nutrition if your skill is higher! --Amy */
+	/* come on, you should be able to cast using less nutrition if your skill is higher! --Amy 
+	* Yes, I agree and i've made it better! --Porkman */
 
-	if (u.uhunger <= 2500) { /* But only if you're not satiated (see above) */
+	if (u.uhunger <= 2500) { /* But only if you're not oversatiated (see above) */
 
-	if ( role_skill == P_BASIC) {hungr *= 85; hungr /= 100;}
-	if ( role_skill == P_SKILLED) {hungr *= 70; hungr /= 100;}
-	if ( role_skill == P_EXPERT) {hungr *= 55; hungr /= 100;}
-	if ( role_skill == P_MASTER) {hungr *= 40; hungr /= 100;}
-	if ( role_skill == P_GRAND_MASTER) {hungr *= 25; hungr /= 100;}
-	if ( role_skill == P_SUPREME_MASTER) {hungr *= 10; hungr /= 100;}
+	if ( role_skill == P_BASIC) {hungr *= 75; hungr /= 100;}
+	if ( role_skill == P_SKILLED) {hungr *= 50; hungr /= 100;}
+	if ( role_skill == P_EXPERT) {hungr *= 33; hungr /= 100;}
+	if ( role_skill == P_MASTER) {hungr *= 20; hungr /= 100;}
+	if ( role_skill == P_GRAND_MASTER) {hungr *= 10; hungr /= 100;}
+	if ( role_skill == P_SUPREME_MASTER) {hungr *= 1; hungr /= 100;}
 
 	/* casting it often (and thereby keeping it in memory) should also reduce hunger... */
 	if ( spellknow(spell) >= 10000) {hungr *= 9; hungr /= 10;}
@@ -3773,11 +3774,11 @@ castanyway:
 
 	/* WAC -- If skilled enough,  will act like a blessed version */
 	if (role_skill >= P_SKILLED) { /* made it depend on skill level --Amy */
-		if (!rn2(10) && role_skill == P_SKILLED) pseudo->blessed = 1;
-		if (!rn2(8) && role_skill == P_EXPERT) pseudo->blessed = 1;
-		if (!rn2(6) && role_skill == P_MASTER) pseudo->blessed = 1;
-		if (!rn2(5) && role_skill == P_GRAND_MASTER) pseudo->blessed = 1;
-		if (!rn2(4) && role_skill == P_SUPREME_MASTER) pseudo->blessed = 1;
+		if (!rn2(6) && role_skill == P_SKILLED) pseudo->blessed = 1;
+		if (!rn2(3) && role_skill == P_EXPERT) pseudo->blessed = 1;
+		if (!rn2(2) && role_skill == P_MASTER) pseudo->blessed = 1;
+		if (!rn2(1) && role_skill == P_GRAND_MASTER) pseudo->blessed = 1;
+		if (role_skill == P_SUPREME_MASTER) pseudo->blessed = 1;
 	}
 
 #ifdef ALLEG_FX
@@ -3877,12 +3878,6 @@ castanyway:
 	case SPE_HYPER_BEAM:
 	case SPE_PARALYSIS:
 
-		if (pseudo->otyp == SPE_PARTICLE_CANNON) {
-			if (u.gaugetimer) {
-				You("need to wait %d more turns to refill your gauge. The particle cannon can be used again at turn %d.", u.gaugetimer, (moves + u.gaugetimer));
-				break;
-			} else {
-				u.gaugetimer = 50;
 			}
 		}
 
@@ -3926,7 +3921,8 @@ magicalenergychoice:
 				 * means that knowing finger of death means death to interface screw can happen at any time.
 				 * I've made magic resistance work too, see zap.c, but those that don't have magic resistance
 				 * shall not be screwed over either. Screw you, programmers. And while you're at it,
-				 * read up on game design and specifically interface design! :P --Amy */
+				 * read up on game design and specifically interface design! :P --Amy 
+				 * I really like this! --Porkman */
 
 				if (yn("Do you really want to input no direction?") == 'y')
 					pline_The("magical energy is released!");
@@ -3950,7 +3946,7 @@ magicalenergychoice:
 		} else weffects(pseudo);
 		update_inventory();	/* spell may modify inventory */
 		if (pseudo->otyp == SPE_TELEPORT_AWAY || pseudo->otyp == SPE_POLYMORPH || pseudo->otyp == SPE_MUTATION || pseudo->otyp == SPE_CANCELLATION) {
-			if (!rn2(5)) {
+			if (!rn2(50)) {
 				pline("The magical energy goes out of control!");
 				badeffect();
 			}
@@ -3964,7 +3960,7 @@ magicalenergychoice:
 		if (pseudo->otyp == SPE_WATER_BOLT) {
 			make_confused(HConfusion + 5, TRUE);
 			make_stunned(HStun + 5, TRUE);
-			if (!rn2(20)) {
+			if (!rn2(50)) {
 				pline("The spell backfires!");
 				badeffect();
 			}
@@ -4007,30 +4003,23 @@ magicalenergychoice:
 		if (role_skill >= P_SKILLED) pseudo->blessed = 1;
 #endif
 		/* fall through */
-	case SPE_CHARM_MONSTER:
-	case SPE_MAGIC_MAPPING:
 	case SPE_CREATE_MONSTER:
-	case SPE_IDENTIFY:
 	case SPE_DESTROY_ARMOR:
 	case SPE_COMMAND_UNDEAD:
 	case SPE_SUMMON_UNDEAD:
 		if (rn2(5)) pseudo->blessed = 0;
 		(void) seffects(pseudo);
 		break;
-	case SPE_CHARGING:
-		pseudo->blessed = 0;
-		(void) seffects(pseudo);
-		break;
 
 	case SPE_ENCHANT_WEAPON:
 	case SPE_ENCHANT_ARMOR:
-		if (role_skill >= P_SUPREME_MASTER) n = 7;
-		else if (role_skill >= P_GRAND_MASTER) n = 8;
-		else if (role_skill >= P_MASTER) n = 9;
-		else if (role_skill >= P_EXPERT) n = 10;
-		else if (role_skill >= P_SKILLED) n = 11;
-		else if (role_skill >= P_BASIC) n = 12;
-		else n = 14;	/* Unskilled or restricted */
+		if (role_skill >= P_SUPREME_MASTER) n = 1;
+		else if (role_skill >= P_GRAND_MASTER) n = 2;
+		else if (role_skill >= P_MASTER) n = 3;
+		else if (role_skill >= P_EXPERT) n = 4;
+		else if (role_skill >= P_SKILLED) n = 6;
+		else if (role_skill >= P_BASIC) n = 8;
+		else n = 12;	/* Unskilled or restricted */
 		if (!rn2(n)) {
 		    pseudo->blessed = 0;
 		    (void) seffects(pseudo);
@@ -4050,7 +4039,7 @@ magicalenergychoice:
 		trap_detectX((struct obj *)0);
 		exercise(A_WIS, TRUE);
 
-		if (!rn2(10)) {
+		if (!rn2(200)) {
 			pline("The spell backlashes!");
 			badeffect();
 		}
@@ -4465,14 +4454,7 @@ aulechoice:
 		break;
 
 	case SPE_ONE_POINT_SHOOT:
-
-		if (u.gaugetimer) {
-			You("need to wait %d more turns to refill your gauge. One Point Shoot can be used again at turn %d.", u.gaugetimer, (moves + u.gaugetimer));
-			break;
-		} else {
-			u.gaugetimer = 50;
-		}
-
+/* Removed the stupid gauge timer -- Porkman */
 		{
 			register struct obj *opbullet;
 			int opbonus = 0;
@@ -4815,12 +4797,12 @@ aulechoice:
 		break;
 
 	case SPE_GOUGE_DICK:
-
+/* Changed the message for females */
 		if (!u.uswallow) {
 			pline("This spell has no effect if you're not engulfed.");
 			break;
 		}
-		pline("You ram into %s with your %spenis.", mon_nam(u.ustuck), flags.female ? "nonexistant " : "");
+		pline("You ram into %s with your %spenis.", mon_nam(u.ustuck), flags.female ? "Massive Strap-on " : "");
 		if (u.ustuck->mpeaceful && !(u.ustuck->mtame)) u.ustuck->mpeaceful = 0; /* monster becomes hostile */
 		u.ustuck->mhp -= d(flags.female ? 2 : 5, 5 + spell_damage_bonus(SPE_GOUGE_DICK) + rno(u.ulevel));
 		u.ustuck->mcanmove = 0;
@@ -4934,7 +4916,7 @@ addspmagain:
 
 		}
 
-		if (!rn2(5)) {
+		if (!rn2(100)) {
 			pline("The spell backfires!");
 			badeffect();
 		}
@@ -6842,7 +6824,7 @@ secureidchoice:
 
 	case SPE_PHASE_DOOR:
 		phase_door(0);
-		if (!rn2(20)) {
+		if (!rn2(200)) {
 			pline("The spell backlashes!");
 			badeffect();
 		}
@@ -7103,14 +7085,11 @@ secureidchoice:
 
 		pline("But then the green light goes out again and the red one lights up...");
 
-		NastinessProblem += 10000;
+		NastinessProblem += 3000;
 		badeffect();
 		badeffect();
-		badeffect();
-		badeffect();
-		badeffect();
-		badeffect();
-		badeffect();
+
+/* Reduced the number of backlashes and duration of the switched bad effect --Porkman */
 
 		break;
 
@@ -7144,7 +7123,7 @@ secureidchoice:
 		    }
 		}
 
-		if (!rn2(10)) {
+		if (!rn2(30)) {
 			pline("The spell backfires!");
 			badeffect();
 		}
@@ -7358,9 +7337,6 @@ secureidchoice:
 			}
 		}
 
-		pline("You are hit by the magical reaction from casting this very powerful spell.");
-		u.uenmax -= rnd(5);
-		badeffect();
 		(void) doredraw();
 
 		break;
@@ -7385,36 +7361,36 @@ secureidchoice:
 			break;
 		}
 
-		u.uhpmax -= rnd(500);
+		u.uhpmax -= rnd(100);
 		if (u.uhp > u.uhpmax) u.uhp = u.uhpmax;
 		if (Upolyd) {
-			u.mhmax -= rnd(500);
+			u.mhmax -= rnd(100);
 			if (u.mh > u.mhmax) u.mh = u.mhmax;
 		}
-		u.uenmax -= rnd(500);
+		u.uenmax -= rnd(100);
 		if (u.uen > u.uenmax) u.uen = u.uenmax;
 
-		ABASE(A_STR) -= rnd(5);
+		ABASE(A_STR) -= rn2(2);
 		if (ABASE(A_STR) < ATTRMIN(A_STR)) ABASE(A_STR) = ATTRMIN(A_STR);
 		AMAX(A_STR) = ABASE(A_STR);
 
-		ABASE(A_DEX) -= rnd(5);
+		ABASE(A_DEX) -= rn2(2);
 		if (ABASE(A_DEX) < ATTRMIN(A_DEX)) ABASE(A_DEX) = ATTRMIN(A_DEX);
 		AMAX(A_DEX) = ABASE(A_DEX);
 
-		ABASE(A_INT) -= rnd(5);
+		ABASE(A_INT) -= rn2(2);
 		if (ABASE(A_INT) < ATTRMIN(A_INT)) ABASE(A_INT) = ATTRMIN(A_INT);
 		AMAX(A_INT) = ABASE(A_INT);
 
-		ABASE(A_WIS) -= rnd(5);
+		ABASE(A_WIS) -= rn2(2);
 		if (ABASE(A_WIS) < ATTRMIN(A_WIS)) ABASE(A_WIS) = ATTRMIN(A_WIS);
 		AMAX(A_WIS) = ABASE(A_WIS);
 
-		ABASE(A_CON) -= rnd(5);
+		ABASE(A_CON) -= rn2(2);
 		if (ABASE(A_CON) < ATTRMIN(A_CON)) ABASE(A_CON) = ATTRMIN(A_CON);
 		AMAX(A_CON) = ABASE(A_CON);
 
-		ABASE(A_CHA) -= rnd(5);
+		ABASE(A_CHA) -= rn2(2);
 		if (ABASE(A_CHA) < ATTRMIN(A_CHA)) ABASE(A_CHA) = ATTRMIN(A_CHA);
 		AMAX(A_CHA) = ABASE(A_CHA);
 
@@ -7442,52 +7418,52 @@ secureidchoice:
 			break;
 		}
 
-		u.uhpmax -= rnd(33);
-		if (rn2(2)) u.uhpmax -= rnd(33);
-		if (!rn2(4)) u.uhpmax -= rnd(33);
+		u.uhpmax -= rnd(5);
+		if (rn2(2)) u.uhpmax -= rnd(5);
+		if (!rn2(4)) u.uhpmax -= rnd(5);
 		if (u.uhp > u.uhpmax) u.uhp = u.uhpmax;
 		if (Upolyd) {
-			u.mhmax -= rnd(33);
-			if (rn2(2)) u.mhmax -= rnd(33);
-			if (!rn2(4)) u.mhmax -= rnd(33);
+			u.mhmax -= rnd(5);
+			if (rn2(2)) u.mhmax -= rnd(5);
+			if (!rn2(4)) u.mhmax -= rnd(5);
 			if (u.mh > u.mhmax) u.mh = u.mhmax;
 		}
-		u.uenmax -= rnd(33);
-		if (rn2(2)) u.uenmax -= rnd(33);
-		if (!rn2(4)) u.uenmax -= rnd(33);
+		u.uenmax -= rnd(5);
+		if (rn2(2)) u.uenmax -= rnd(5);
+		if (!rn2(4)) u.uenmax -= rnd(5);
 		if (u.uen > u.uenmax) u.uen = u.uenmax;
 
-		if (!rn2(2)) {
+		if (!rn2(20)) {
 		ABASE(A_STR) -= 1;
 		if (ABASE(A_STR) < ATTRMIN(A_STR)) ABASE(A_STR) = ATTRMIN(A_STR);
 		AMAX(A_STR) = ABASE(A_STR);
 		}
 
-		if (!rn2(2)) {
+		if (!rn2(20)) {
 		ABASE(A_DEX) -= 1;
 		if (ABASE(A_DEX) < ATTRMIN(A_DEX)) ABASE(A_DEX) = ATTRMIN(A_DEX);
 		AMAX(A_DEX) = ABASE(A_DEX);
 		}
 
-		if (!rn2(2)) {
+		if (!rn2(20)) {
 		ABASE(A_INT) -= 1;
 		if (ABASE(A_INT) < ATTRMIN(A_INT)) ABASE(A_INT) = ATTRMIN(A_INT);
 		AMAX(A_INT) = ABASE(A_INT);
 		}
 
-		if (!rn2(2)) {
+		if (!rn2(20)) {
 		ABASE(A_WIS) -= 1;
 		if (ABASE(A_WIS) < ATTRMIN(A_WIS)) ABASE(A_WIS) = ATTRMIN(A_WIS);
 		AMAX(A_WIS) = ABASE(A_WIS);
 		}
 
-		if (!rn2(2)) {
+		if (!rn2(20)) {
 		ABASE(A_CON) -= 1;
 		if (ABASE(A_CON) < ATTRMIN(A_CON)) ABASE(A_CON) = ATTRMIN(A_CON);
 		AMAX(A_CON) = ABASE(A_CON);
 		}
 
-		if (!rn2(2)) {
+		if (!rn2(20)) {
 		ABASE(A_CHA) -= 1;
 		if (ABASE(A_CHA) < ATTRMIN(A_CHA)) ABASE(A_CHA) = ATTRMIN(A_CHA);
 		AMAX(A_CHA) = ABASE(A_CHA);
@@ -7858,11 +7834,13 @@ secureidchoice:
 
 	case SPE_RUSSIAN_ROULETTE:
 
-		if (rn2(10)) {
+/* Chances changed. Most revolvers have six chambers! Now there's one bad effect bullet, one deadly bullet, and the rest are vitalizing bullets! (but the deadly bullet is much more deadly)*
+
+		if (!rn2(6)) {
 			pline("Click!");
 			badeffect();
 
-		} else if (rn2(10)) {
+		} else if (rn2(5)) {
 			pline("Click! You feel vitalized.");
 			u.uhpmax++;
 			if (Upolyd) u.mhmax++;
@@ -7873,7 +7851,7 @@ secureidchoice:
 
 		} else {
 			pline("BANG! You suffer from extreme blood loss!");
-			u.uhp -= rnd(50);
+			u.uhp -= rnd(300);
 			u.uhpmax -= rnd(50);
 			if (u.uhp > u.uhpmax) u.uhp = u.uhpmax;
 			if (u.uhp < 1) {
@@ -7982,16 +7960,21 @@ secureidchoice:
 		if (rn2(3)) TimeStopped += (rnd(3) + 1);
 		else TimeStopped += rnd(3 + spell_damage_bonus(spellid(spell)) );
 		break;
+		
 	case SPE_LEVELPORT:
+	/* It now only backlashes with a 10% chance --Porkman */
 	      if (!flags.lostsoul && !flags.uberlostsoul && !(flags.wonderland && !(u.wonderlandescape)) && !(iszapem && !(u.zapemescape)) && !(u.uprops[STORM_HELM].extrinsic) && !(In_bellcaves(&u.uz)) && !(In_subquest(&u.uz)) && !(In_voiddungeon(&u.uz)) && !(In_netherrealm(&u.uz))) {
 			level_tele();
-			pline("From your strain of casting such a powerful spell, the magical energy backlashes on you.");
-			badeffect();
+			if (!rn2(10)) {
+				pline("From your strain of casting such a powerful spell, the magical energy backlashes on you.");
+				badeffect();
+			}
 		}
 		else pline("Hmm... that level teleport spell didn't do anything.");
 
 		break;
 	case SPE_WARPING:
+	/* It now only backlashes 10% of the time -- Porkman */
 		if (((u.uevent.udemigod || u.uhave.amulet) && !u.freeplaymode) || CannotTeleport || (u.usteed && mon_has_amulet(u.usteed))) { pline("You shudder for a moment."); break;}
 
 		if (flags.lostsoul || flags.uberlostsoul || (flags.wonderland && !(u.wonderlandescape)) || (iszapem && !(u.zapemescape)) || u.uprops[STORM_HELM].extrinsic || In_bellcaves(&u.uz) || In_subquest(&u.uz) || In_voiddungeon(&u.uz) || In_netherrealm(&u.uz)) { 
@@ -8008,7 +7991,7 @@ secureidchoice:
 		get_level(&newlevel, newlev);
 		goto_level(&newlevel, TRUE, FALSE, FALSE);
 
-		if (rn2(2)) {
+		if (rn2(10)) {
 			pline("From your strain of casting such a powerful spell, the magical energy backlashes on you.");
 			badeffect();
 		}
@@ -8217,12 +8200,13 @@ dashingchoice:
 		break;
 
 	case SPE_LOCKOUT:
+	/* Mana loss reduced to 2 - Porkman */
 		{
 		int madepoolQ = 0;
 		do_clear_areaX(u.ux, u.uy, 5 + rnd(5), do_lockfloodg, (void *)&madepoolQ);
 		if (madepoolQ) pline("The area is walled off!");
 		if (rn2(2)) {
-			u.uenmax -= rnd(5);
+			u.uenmax -= rnd(2);
 			if (u.uenmax < 0) u.uenmax = 0;
 			if (u.uen > u.uenmax) u.uen = u.uenmax;
 			pline("Casting this spell is straining for your maximum mana supply.");
@@ -8816,11 +8800,13 @@ totemsummonchoice:
 
 		break;
 
+/* shielding spells have had their duration increased --Porkman */
+
 	case SPE_DISRUPTION_SHIELD:
 
 		You("activate your mana shield.");
 
-		u.disruptionshield = 30 + (spell_damage_bonus(spellid(spell)) * 7);
+		u.disruptionshield = 50 + (spell_damage_bonus(spellid(spell)) * 7);
 
 		break;
 
@@ -8828,7 +8814,7 @@ totemsummonchoice:
 
 		You("activate your holy shield.");
 
-		u.holyshield = 20 + (spell_damage_bonus(spellid(spell)) * 3);
+		u.holyshield = 50 + (spell_damage_bonus(spellid(spell)) * 3);
 
 		break;
 
@@ -9407,12 +9393,14 @@ controlagain:
 
 	case SPE_WORLD_FALL:
 
+/* It now goes back to affecting monsters of up to your own level instead of half of it. Backlashes have been reduced to something more sane. --Porkman */
+
 		You("scream \"EYGOORTS-TOGAAL, JEZEHH!\"");
 		{
 		int num;
 	      register struct monst *wfm, *wfm2;
 		num = 0;
-		int wflvl = (u.ulevel / 2);
+		int wflvl = (u.ulevel);
 		if (wflvl < 1) wflvl = 1;
 
 		for (wfm = fmon; wfm; wfm = wfm2) {
@@ -9444,23 +9432,21 @@ controlagain:
 		badeffect();
 		badeffect();
 		badeffect();
-		badeffect();
-		badeffect();
-		badeffect();
-		badeffect();
-		NastinessProblem += rnz(1000 * (monster_difficulty() + 1));
+		NastinessProblem += rnz(100 * (monster_difficulty() + 1));
 
 		break;
 
 	case SPE_GENOCIDE:
 
-		if (role_skill >= P_SUPREME_MASTER) n = 13;
-		else if (role_skill >= P_GRAND_MASTER) n = 15;
-		else if (role_skill >= P_MASTER) n = 16;
-		else if (role_skill >= P_EXPERT) n = 18;
-		else if (role_skill >= P_SKILLED) n = 20;
-		else if (role_skill >= P_BASIC) n = 22;
-		else n = 25;	/* Unskilled or restricted */
+/* Chances increased at higher skill levels. A supreme master should be able to cast anything they want almost reliably */
+
+		if (role_skill >= P_SUPREME_MASTER) n = 2;
+		else if (role_skill >= P_GRAND_MASTER) n = 3;
+		else if (role_skill >= P_MASTER) n = 4;
+		else if (role_skill >= P_EXPERT) n = 8;
+		else if (role_skill >= P_SKILLED) n = 12;
+		else if (role_skill >= P_BASIC) n = 20;
+		else n = 30;	/* Unskilled or restricted */
 		if (!rn2(n)) {
 			do_genocide(1);	/* REALLY, see do_genocide() */
 		} else
@@ -9469,13 +9455,15 @@ controlagain:
 
 	case SPE_GAIN_LEVEL:
 
-		if (role_skill >= P_SUPREME_MASTER) n = 38;
-		else if (role_skill >= P_GRAND_MASTER) n = 40;
-		else if (role_skill >= P_MASTER) n = 42;
-		else if (role_skill >= P_EXPERT) n = 44;
-		else if (role_skill >= P_SKILLED) n = 46;
-		else if (role_skill >= P_BASIC) n = 48;
-		else n = 50;	/* Unskilled or restricted */
+/* Increased chances at higher skill levels. Reduced at lower skill levels. --Porkman */
+
+		if (role_skill >= P_SUPREME_MASTER) n = 4;
+		else if (role_skill >= P_GRAND_MASTER) n = 8;
+		else if (role_skill >= P_MASTER) n = 16;
+		else if (role_skill >= P_EXPERT) n = 20;
+		else if (role_skill >= P_SKILLED) n = 40;
+		else if (role_skill >= P_BASIC) n = 60;
+		else n = 80;	/* Unskilled or restricted */
 		if (!rn2(n)) {
 			gainlevelmaybe();
 		} else
@@ -9490,34 +9478,30 @@ controlagain:
 
 	case SPE_SATISFY_HUNGER:
 
+/* Now a lot more satisfaction! --Porkman */
+
 		pline("Your stomach is filled a bit.");
-		lesshungry(100);
+		lesshungry(300);
 
 		break;
 
 	case SPE_BACKFIRE:
-
+		pline("You hear Porkman muttering: You're a damn fool for casting this krap!"
 		badeffect();
 
 		break;
 
 	case SPE_MAP_LEVEL:
 
-		if (level.flags.nommap) {
+/* Totally denerfed! --Porkman */
 
-			pline("Whoops, something blocks the spell's power and causes it to backfire.");
-			badeffect();
-			break;
-
-		}
-
-		if (role_skill >= P_SUPREME_MASTER) n = 4;
-		else if (role_skill >= P_GRAND_MASTER) n = 5;
-		else if (role_skill >= P_MASTER) n = 7;
-		else if (role_skill >= P_EXPERT) n = 9;
-		else if (role_skill >= P_SKILLED) n = 11;
-		else if (role_skill >= P_BASIC) n = 13;
-		else n = 15;	/* Unskilled or restricted */
+		if (role_skill >= P_SUPREME_MASTER) n = 1;
+		else if (role_skill >= P_GRAND_MASTER) n = 2;
+		else if (role_skill >= P_MASTER) n = 3;
+		else if (role_skill >= P_EXPERT) n = 4;
+		else if (role_skill >= P_SKILLED) n = 6;
+		else if (role_skill >= P_BASIC) n = 8;
+		else n = 12;	/* Unskilled or restricted */
 		if (!rn2(n)) {
 		    struct trap *t;
 		    long save_Hconf = HConfusion,
@@ -9525,18 +9509,17 @@ controlagain:
 	
 		    HConfusion = HHallucination = 0L;
 		    for (t = ftrap; t != 0; t = t->ntrap) {
-			if (!rn2(2)) continue;
-			/* easier trap difficulty check compared to other detection methods because map level is powerful --Amy */
-			if (!t->hiddentrap && (t->trapdiff < rnd(150)) ) t->tseen = 1;
+			if (rn2(20)) continue;
+			/* easier trap difficulty check compared to other detection methods because map level is powerful --Amy. Made that much easier by --Porkman*/
 			map_trap(t, TRUE);
 		    }
 		    do_mappingY();
 		    HConfusion = save_Hconf;
 		    HHallucination = save_Hhallu;
 		    You_feel("knowledgable!");
-		    object_detect(pseudo, 0);
+		    object_detect(pseudo, 1);
 
-		    if (!rn2(3)) {
+		    if (!rn2(300)) {
 			pline("The spell backlashes!");
 			badeffect();
 		    }
@@ -9546,10 +9529,12 @@ controlagain:
 		break;
 
 	case SPE_GODMODE:
-		if (rn2(3)) incr_itimeout(&Invulnerable, rnd(5) );
-		else incr_itimeout(&Invulnerable, rnd(5 + spell_damage_bonus(spellid(spell)) ) );
+	/* Duration slightly increased -- Porkman */
+		if (rn2(3)) incr_itimeout(&Invulnerable, rnd(8) );
+		else incr_itimeout(&Invulnerable, rnd(8 + spell_damage_bonus(spellid(spell)) ) );
 		You_feel("invincible!");
 		break;
+		
 	case SPE_ACIDSHIELD:
 		if(!(HAcid_resistance & INTRINSIC)) {
 			You("are resistant to acid now. Your items, however, are not.");
@@ -9590,9 +9575,10 @@ controlagain:
 		}
 		break;
 	case SPE_FLYING:
+	/* Increased duration a little -- Porkman */
 		if(!(HFlying & INTRINSIC)) {
 			You("start flying!");
-			incr_itimeout(&HFlying, HFlying ? (rnd(4) + spell_damage_bonus(spellid(spell))) : (rn1(20, 25) + spell_damage_bonus(spellid(spell))*20));
+			incr_itimeout(&HFlying, HFlying ? (rnd(4) + spell_damage_bonus(spellid(spell))) : (rn1(20, 25) + spell_damage_bonus(spellid(spell))*50));
 		} else {
 			pline("%s", nothing_happens);	/* Already have as intrinsic */
 			if (FailureEffects || u.uprops[FAILURE_EFFECTS].extrinsic || have_failurestone()) {
@@ -9645,9 +9631,10 @@ controlagain:
 		break;
 
 	case SPE_HOLD_AIR:
+	/* Increased duration --Porkman */
 		if(!(HMagical_breathing & INTRINSIC)) {
 			You("hold your breath.");
-			incr_itimeout(&HMagical_breathing, HMagical_breathing ? (rnd(5) + spell_damage_bonus(spellid(spell))) : (rn1(40, 20) + spell_damage_bonus(spellid(spell))*10));
+			incr_itimeout(&HMagical_breathing, HMagical_breathing ? (rnd(5) + spell_damage_bonus(spellid(spell))) : (rn1(40, 20) + spell_damage_bonus(spellid(spell))*50));
 		} else {
 			pline("%s", nothing_happens);	/* Already have as intrinsic */
 			if (FailureEffects || u.uprops[FAILURE_EFFECTS].extrinsic || have_failurestone()) {
@@ -9658,9 +9645,10 @@ controlagain:
 		break;
 
 	case SPE_SWIMMING:
+	/* Increased duration a lot -- Porkman */
 		if(!(HSwimming & INTRINSIC)) {
 			You("grow water wings.");
-			incr_itimeout(&HSwimming, HSwimming ? (rnd(10) + spell_damage_bonus(spellid(spell))) : (rn1(100, 50) + spell_damage_bonus(spellid(spell))*10));
+			incr_itimeout(&HSwimming, HSwimming ? (rnd(10) + spell_damage_bonus(spellid(spell))) : (rn1(100, 50) + spell_damage_bonus(spellid(spell))*100));
 		} else {
 			pline("%s", nothing_happens);	/* Already have as intrinsic */
 			if (FailureEffects || u.uprops[FAILURE_EFFECTS].extrinsic || have_failurestone()) {
@@ -9794,19 +9782,20 @@ controlagain:
 		break;
 
 	case SPE_FORBIDDEN_KNOWLEDGE:
+	/* Increased duration by a shitload -- Porkman */
 		if(!(HHalf_spell_damage & INTRINSIC)) {
 			if (FunnyHallu)
 				pline("Let the casting commence!");
 			else
 				You_feel("a sense of spell knowledge.");
-			incr_itimeout(&HHalf_spell_damage, rn1(500, 250) + spell_damage_bonus(spellid(spell))*50);
+			incr_itimeout(&HHalf_spell_damage, rn1(500, 250) + spell_damage_bonus(spellid(spell))*500);
 		}
 		if(!(HHalf_physical_damage & INTRINSIC)) {
 			if (FunnyHallu)
 				You_feel("like a tough motherfucker!");
 			else
 				You("are resistant to normal damage.");
-			incr_itimeout(&HHalf_physical_damage, rn1(500, 250) + spell_damage_bonus(spellid(spell))*50);
+			incr_itimeout(&HHalf_physical_damage, rn1(500, 250) + spell_damage_bonus(spellid(spell))*500);
 		}
 		u.ugangr++;
 
@@ -9884,8 +9873,8 @@ controlagain:
 			You_feel("ethereal.");
 		incr_itimeout(&HPasses_walls, rn1(10, 5));
 
-		/* way too uber, needs nerf --Amy */
-		if (!rn2(5)) badeffect();
+		/* way too uber, needs nerf --Amy. Somewhat denerfed by --Porkman */
+		if (!rn2(50)) badeffect();
 
 		break;
 
@@ -9936,7 +9925,8 @@ repairarmorchoice:
 
 	case SPE_REROLL_ARTIFACT:
 
-		pline("You may choose an artifact in your inventory to reroll. It may not be a worn one though.");
+		pline("You may choose an artifact in your inventory to reroll. It may also be a worn one, but be extra careful if you do that!");
+/* Why shouldn't it let you reroll a worn one? Well, it can now do that, but that comes with added fun effects. Also, HP/mana penalties have been lessened --Porkman */
 rerollartifactchoice:
 		otmp = getobj(all_count, "reroll");
 		if (!otmp) {
@@ -9950,15 +9940,33 @@ rerollartifactchoice:
 			pline("That is not an artifact, and can therefore not be rerolled!");
 			break;
 		}
-		if (otmp->owornmask) {
-			pline("You cannot reroll an artifact that you're wearing!");
-			break;
-		}
+		
 		if (!(otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS || otmp->oclass == RING_CLASS || otmp->oclass == AMULET_CLASS || otmp->oclass == IMPLANT_CLASS)) {
 			pline("You can only reroll weapons, armors, rings, implants or amulets!");
 			break;
 		}
-
+/* 		Must figure out code to unequip artifact if it is equipped -- Porkman */
+		if (otmp->owornmask) {
+			pline("Your artifact unequips itself as it starts rerolling... and so does the rest of your gear!");
+			shank_player();
+			shank_player();
+			shank_player();
+			shank_player();
+			shank_player();
+			shank_player();
+			shank_player();
+			shank_player();
+			shank_player();
+			shank_player();
+			shank_player();
+			shank_player();
+			shank_player();
+			shank_player();
+			shank_player();
+			shank_player();
+			shank_player();
+			continue;
+			
 		switch (otmp->oclass) {
 			case WEAPON_CLASS:
 
@@ -10015,7 +10023,7 @@ rerollX:
 
 		pline("The strain of casting such a powerful spell damages your maximum health and mana.");
 
-		u.uhpmax -= rnd(10);
+		u.uhpmax -= rnd(5);
 		if (u.uhp > u.uhpmax) u.uhp = u.uhpmax;
 		if (u.uhp < 1) {
 			u.youaredead = 1;
@@ -10025,11 +10033,11 @@ rerollX:
 			u.youaredead = 0;
 		}
 		if (Upolyd) {
-			u.mhmax -= rnd(10);
+			u.mhmax -= rnd(3);
 			if (u.mh > u.mhmax) u.mh = u.mhmax;
 		}
 
-		u.uenmax -= rnd(10);
+		u.uenmax -= rnd(5);
 		if (u.uen > u.uenmax) u.uen = u.uenmax;
 
 		break;
@@ -10206,6 +10214,7 @@ rerollX:
 		if (spellknow(spell) < 0) spl_book[spell].sp_know = 0;
 
 	}
+/* Chances of backlashes are significantly reduced at higher skill levels. Grand/Supreme masters damn well know what they are doing! --Porkman */
 
 	if ((spell_skilltype(spellid(spell)) == P_OCCULT_SPELL) && !(uarmg && uarmg->oartifact == ART_FATHIEN_ELDER_S_SECRET_POW) ) { /* dangerous realm... */
 		if (PlayerCannotUseSkills) {
@@ -10214,43 +10223,43 @@ rerollX:
 			default:
 			case P_ISRESTRICTED:
 			case P_UNSKILLED:
-				if (!rn2(Role_if(PM_OCCULT_MASTER) ? 12 : 5)) {
+				if (!rn2(Role_if(PM_OCCULT_MASTER) ? 12 : 4)) {
 					pline("You fail to control the occult powers and are hit with backlash!");
 					badeffect();
 				}
 				break;
 			case P_BASIC:
-				if (!rn2(Role_if(PM_OCCULT_MASTER) ? 14 : 6)) {
+				if (!rn2(Role_if(PM_OCCULT_MASTER) ? 18 : 7)) {
 					pline("You fail to control the occult powers and are hit with backlash!");
 					badeffect();
 				}
 				break;
 			case P_SKILLED:
-				if (!rn2(Role_if(PM_OCCULT_MASTER) ? 16 : 7)) {
+				if (!rn2(Role_if(PM_OCCULT_MASTER) ? 24 : 10)) {
 					pline("You fail to control the occult powers and are hit with backlash!");
 					badeffect();
 				}
 				break;
 			case P_EXPERT:
-				if (!rn2(Role_if(PM_OCCULT_MASTER) ? 20 : 8)) {
+				if (!rn2(Role_if(PM_OCCULT_MASTER) ? 40 : 16)) {
 					pline("You fail to control the occult powers and are hit with backlash!");
 					badeffect();
 				}
 				break;
 			case P_MASTER:
-				if (!rn2(Role_if(PM_OCCULT_MASTER) ? 22 : 9)) {
+				if (!rn2(Role_if(PM_OCCULT_MASTER) ? 90 : 25)) {
 					pline("You fail to control the occult powers and are hit with backlash!");
 					badeffect();
 				}
 				break;
 			case P_GRAND_MASTER:
-				if (!rn2(Role_if(PM_OCCULT_MASTER) ? 25 : 10)) {
+				if (!rn2(Role_if(PM_OCCULT_MASTER) ? 230 : 65)) {
 					pline("You fail to control the occult powers and are hit with backlash!");
 					badeffect();
 				}
 				break;
 			case P_SUPREME_MASTER:
-				if (!rn2(Role_if(PM_OCCULT_MASTER) ? 30 : 11)) {
+				if (!rn2(Role_if(PM_OCCULT_MASTER) ? 450 : 140)) {
 					pline("You fail to control the occult powers and are hit with backlash!");
 					badeffect();
 				}
@@ -10258,24 +10267,14 @@ rerollX:
 		}
 	}
 
-	/* charging is way too overpowered, let's add another "bullshit downside" --Amy */
-	if (pseudo && (pseudo->otyp == SPE_CHARGING) && !rn2(role_skill == P_SUPREME_MASTER ? 16 : role_skill == P_GRAND_MASTER ? 15 : role_skill == P_MASTER ? 13 : role_skill == P_EXPERT ? 12 : role_skill == P_SKILLED ? 11 : 10) ) {
-
-		badeffect();
+	/* charging is way too overpowered, let's add another "bullshit downside" --Amy * No, let's remove it! Look! It's gone! --Porkman/
+	
 
 	}
 
 	/* particle cannon and one point shoot need "gauge"; since this isn't Elona, we don't have an actual gauge meter,
-	 * so I decided that it just takes 50 turns to reload --Amy */
-	if (pseudo && (pseudo->otyp == SPE_PARTICLE_CANNON)) {
-		pline("The particle cannon can be used again at turn %d.", (moves + u.gaugetimer));
-	}
-	if (pseudo && (pseudo->otyp == SPE_ONE_POINT_SHOOT)) {
-		pline("One Point Shoot can be used again at turn %d.", (moves + u.gaugetimer));
-	}
-
-	obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
-	return(1);
+	 * so I decided that it just takes 50 turns to reload --Amy 
+	 * No, it doesn't... --Porkman */
 }
 
 /* #spelldelete command: allows the player to erase the bottommost spell outright, but only if it's a forgotten one */
@@ -11449,41 +11448,41 @@ int spell;
 
 	if (Race_if(PM_PLAYER_SKELETON)) chance -= 50;
 
-	if (spell_skilltype(spellid(spell)) == P_CHAOS_SPELL) { /* more difficult! */
+	if (spell_skilltype(spellid(spell)) == P_CHAOS_SPELL) { /* more difficult! But made a little bit easier by -- porkman */
 
 	switch (spellev(spell)) {
 
 			case 1:
-				chance -= 5;
+				chance -= 3;
 				if (!Role_if(PM_CHAOS_SORCEROR)) chance -= 5;
 				break;
 			case 2:
-				chance -= 10;
+				chance -= 8;
 				if (!Role_if(PM_CHAOS_SORCEROR)) chance -= 10;
 				break;
 			case 3:
-				chance -= 15;
+				chance -= 10;
 				if (!Role_if(PM_CHAOS_SORCEROR)) chance -= 15;
 				break;
 			case 4:
-				chance -= 25;
-				if (!Role_if(PM_CHAOS_SORCEROR)) chance -= 25;
+				chance -= 15;
+				if (!Role_if(PM_CHAOS_SORCEROR)) chance -= 20;
 				break;
 			case 5:
-				chance -= 40;
-				if (!Role_if(PM_CHAOS_SORCEROR)) chance -= 40;
+				chance -= 20;
+				if (!Role_if(PM_CHAOS_SORCEROR)) chance -= 30;
 				break;
 			case 6:
-				chance -= 58;
-				if (!Role_if(PM_CHAOS_SORCEROR)) chance -= 60;
+				chance -= 40;
+				if (!Role_if(PM_CHAOS_SORCEROR)) chance -= 50;
 				break;
 			case 7:
-				chance -= 70;
-				if (!Role_if(PM_CHAOS_SORCEROR)) chance -= 80;
+				chance -= 50;
+				if (!Role_if(PM_CHAOS_SORCEROR)) chance -= 60;
 				break;
 			case 8:
-				chance -= 75;
-				if (!Role_if(PM_CHAOS_SORCEROR)) chance -= 100;
+				chance -= 60;
+				if (!Role_if(PM_CHAOS_SORCEROR)) chance -= 70;
 				break;
 
 		}
@@ -11524,7 +11523,7 @@ int spell;
 				case MT_GOLD: chance -= 10; break;
 				case MT_PLATINUM: chance -= 26; break;
 				case MT_MITHRIL: chance -= 18; break;
-				case MT_VIVA: chance -= 16; break;
+				case MT_VIVA: chance -= 1; break;
 				case MT_POURPOOR: chance -= 30; break;
 				case MT_LEAD: chance -= 40; break;
 				case MT_CHROME: chance -= 14; break;
@@ -11541,7 +11540,7 @@ int spell;
 				case MT_GOLD: chance -= 10; break;
 				case MT_PLATINUM: chance -= 26; break;
 				case MT_MITHRIL: chance -= 18; break;
-				case MT_VIVA: chance -= 16; break;
+				case MT_VIVA: chance -= 1; break;
 				case MT_POURPOOR: chance -= 30; break;
 				case MT_LEAD: chance -= 40; break;
 				case MT_CHROME: chance -= 14; break;
@@ -11558,7 +11557,7 @@ int spell;
 				case MT_GOLD: chance -= 10; break;
 				case MT_PLATINUM: chance -= 26; break;
 				case MT_MITHRIL: chance -= 18; break;
-				case MT_VIVA: chance -= 16; break;
+				case MT_VIVA: chance -= 1; break;
 				case MT_POURPOOR: chance -= 30; break;
 				case MT_LEAD: chance -= 40; break;
 				case MT_CHROME: chance -= 14; break;
@@ -11575,7 +11574,7 @@ int spell;
 				case MT_GOLD: chance -= 10; break;
 				case MT_PLATINUM: chance -= 26; break;
 				case MT_MITHRIL: chance -= 18; break;
-				case MT_VIVA: chance -= 16; break;
+				case MT_VIVA: chance -= 1; break;
 				case MT_POURPOOR: chance -= 30; break;
 				case MT_LEAD: chance -= 40; break;
 				case MT_CHROME: chance -= 14; break;
@@ -11592,7 +11591,7 @@ int spell;
 				case MT_GOLD: chance -= 10; break;
 				case MT_PLATINUM: chance -= 26; break;
 				case MT_MITHRIL: chance -= 18; break;
-				case MT_VIVA: chance -= 16; break;
+				case MT_VIVA: chance -= 1; break;
 				case MT_POURPOOR: chance -= 30; break;
 				case MT_LEAD: chance -= 40; break;
 				case MT_CHROME: chance -= 14; break;
@@ -11609,7 +11608,7 @@ int spell;
 				case MT_GOLD: chance -= 10; break;
 				case MT_PLATINUM: chance -= 26; break;
 				case MT_MITHRIL: chance -= 18; break;
-				case MT_VIVA: chance -= 16; break;
+				case MT_VIVA: chance -= 1; break;
 				case MT_POURPOOR: chance -= 30; break;
 				case MT_LEAD: chance -= 40; break;
 				case MT_CHROME: chance -= 14; break;
@@ -11626,7 +11625,7 @@ int spell;
 				case MT_GOLD: chance -= 10; break;
 				case MT_PLATINUM: chance -= 26; break;
 				case MT_MITHRIL: chance -= 18; break;
-				case MT_VIVA: chance -= 16; break;
+				case MT_VIVA: chance -= 1; break;
 				case MT_POURPOOR: chance -= 30; break;
 				case MT_LEAD: chance -= 40; break;
 				case MT_CHROME: chance -= 14; break;
@@ -11643,7 +11642,7 @@ int spell;
 				case MT_GOLD: chance -= 10; break;
 				case MT_PLATINUM: chance -= 26; break;
 				case MT_MITHRIL: chance -= 18; break;
-				case MT_VIVA: chance -= 16; break;
+				case MT_VIVA: chance -= 1; break;
 				case MT_POURPOOR: chance -= 30; break;
 				case MT_LEAD: chance -= 40; break;
 				case MT_CHROME: chance -= 14; break;
@@ -11660,7 +11659,7 @@ int spell;
 				case MT_GOLD: chance -= 10; break;
 				case MT_PLATINUM: chance -= 26; break;
 				case MT_MITHRIL: chance -= 18; break;
-				case MT_VIVA: chance -= 16; break;
+				case MT_VIVA: chance -= 1; break;
 				case MT_POURPOOR: chance -= 30; break;
 				case MT_LEAD: chance -= 40; break;
 				case MT_CHROME: chance -= 14; break;
@@ -11677,7 +11676,7 @@ int spell;
 				case MT_GOLD: chance -= 10; break;
 				case MT_PLATINUM: chance -= 26; break;
 				case MT_MITHRIL: chance -= 18; break;
-				case MT_VIVA: chance -= 16; break;
+				case MT_VIVA: chance -= 1; break;
 				case MT_POURPOOR: chance -= 30; break;
 				case MT_LEAD: chance -= 40; break;
 				case MT_CHROME: chance -= 14; break;
@@ -11694,7 +11693,7 @@ int spell;
 				case MT_GOLD: chance -= 10; break;
 				case MT_PLATINUM: chance -= 26; break;
 				case MT_MITHRIL: chance -= 18; break;
-				case MT_VIVA: chance -= 16; break;
+				case MT_VIVA: chance -= 1; break;
 				case MT_POURPOOR: chance -= 30; break;
 				case MT_LEAD: chance -= 40; break;
 				case MT_CHROME: chance -= 14; break;
@@ -11711,7 +11710,7 @@ int spell;
 				case MT_GOLD: chance -= 10; break;
 				case MT_PLATINUM: chance -= 26; break;
 				case MT_MITHRIL: chance -= 18; break;
-				case MT_VIVA: chance -= 16; break;
+				case MT_VIVA: chance -= 1; break;
 				case MT_POURPOOR: chance -= 30; break;
 				case MT_LEAD: chance -= 40; break;
 				case MT_CHROME: chance -= 14; break;
@@ -11728,7 +11727,7 @@ int spell;
 				case MT_GOLD: chance -= 10; break;
 				case MT_PLATINUM: chance -= 26; break;
 				case MT_MITHRIL: chance -= 18; break;
-				case MT_VIVA: chance -= 16; break;
+				case MT_VIVA: chance -= 1; break;
 				case MT_POURPOOR: chance -= 30; break;
 				case MT_LEAD: chance -= 40; break;
 				case MT_CHROME: chance -= 14; break;
@@ -11745,7 +11744,7 @@ int spell;
 				case MT_GOLD: chance -= 10; break;
 				case MT_PLATINUM: chance -= 26; break;
 				case MT_MITHRIL: chance -= 18; break;
-				case MT_VIVA: chance -= 16; break;
+				case MT_VIVA: chance -= 1; break;
 				case MT_POURPOOR: chance -= 30; break;
 				case MT_LEAD: chance -= 40; break;
 				case MT_CHROME: chance -= 14; break;
@@ -11801,21 +11800,23 @@ int spell;
 	if (RngeUnnethack) chance -= 33;
 
 	/* "bullshit change" by Amy: make it quite a bit harder to get to 0% fail, because spells are generally easier to
-	 * cast compared to vanilla which results in difficult spells being too easy for non-caster roles */
-	if (chance > 50) {
-		int chancediff = (chance - 50);
-		chancediff /= 2;
-		if (chancediff > 50) chancediff = 50;
-		chance -= chancediff;
-
-		if (chance > 90) {
-			int chancediff = (chance - 90);
-			chancediff *= 9;
-			chancediff /= 10;
-			if (chancediff > 90) chancediff = 90;
-			chance -= chancediff;
+	 * cast compared to vanilla which results in difficult spells being too easy for non-caster roles 
+	 Yup. That's gone. Commented out. Kaboom! --Porkman */
+	 
+	/*if (chance > 50) {
+	*	int chancediff = (chance - 50);
+	*	chancediff /= 2;
+	*	if (chancediff > 50) chancediff = 50;
+	*	chance -= chancediff;
+	*
+	*	if (chance > 90) {
+	*		int chancediff = (chance - 90);
+	*		chancediff *= 9;
+	*		chancediff /= 10;
+	*		if (chancediff > 90) chancediff = 90;
+	*		chance -= chancediff;
 		}
-	}
+	} */
 
 	/* Clamp to percentile */
 	if (chance > 100) chance = 100;
