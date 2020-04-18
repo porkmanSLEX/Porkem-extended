@@ -2329,6 +2329,12 @@ A("The Iron Ball of Levitation", HEAVY_IRON_BALL, /* levitation when wielded */
 	0,	A_CHAOTIC, NON_PM, NON_PM, 5000L),
 	/*Note: it had caried stealth before*/
 
+A("Porkman's balls of steel", HEAVY_SILVER_BALL, /* Lots of porky unbalanced effects! -- Porkman */
+	(SPFX_DEFN|SPFX_ATTK|SPFX_EREGEN|SPFX_REFLECT|SPFX_STLTH|SPFX_REGEN|SPFX_HPHDAM|SPFX_HSPDAM|SPFX_SLW_DGST), 0, 0,
+	PHYS(15,0),	DFNS(AD_DRLI),	CARY(AD_MAGM),
+	0,	A_CHAOTIC, NON_PM, NON_PM, 5000L),
+	/*Note: it SO VERY PORKISH!*/
+
 A("The Iron Spoon of Liberation", SPOON,
 	(SPFX_RESTR|SPFX_DEFN|SPFX_LUCK|SPFX_INTEL|SPFX_STLTH|SPFX_SEARCH|SPFX_SEEK), 0, 0,
 	PHYS(5,0),	DFNS(AD_MAGM),	NO_CARY,

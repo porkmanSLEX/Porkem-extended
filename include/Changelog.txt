@@ -1,0 +1,15 @@
+Pork'em Extended 1.0.0
+
+Wands of wishing are now back to about vanilla generation chances. Scrolls of wishing now can be found roughly with their prenerf probabilities. 
+
+Slightly tweaked drop rates of many other consumables. 
+
+Ball weights are back to a sane level. The heavier balls’ damage has been tweaked too. The iron ball of liberation weighs even less for convicts. 
+
+New artifacts: Porkman’s balls of steel. It's so porkishly unbalanced that I won't even tell you what it does. 
+
+If an evil artifact is forced onto you, chances are much greater that it’ll increase your skill cap with it. 
+
+Rings now give their intrinsics with 50% chance, amulets with 33%, unless they’re made of viva, in which case it’s 80%
+
+Bones stuffing has been denerfed: Items should no longer disappear and degrade, containers keep their contents, porky items remain porky, and the gauntlet key (which isn’t guaranteed to appear) now can be left in the bones pile. Additionally, the candelabrum left in bones now turns into a magic candle instead of an ordinary one.

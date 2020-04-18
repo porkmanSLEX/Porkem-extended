@@ -36,6 +36,7 @@
 #define SPFX_PROTEC 0x08000000L	/* protects you if worn (+2 to AC) */
 #define SPFX_EVIL   0x10000000L	/* considered to be an artifact with disadvantages --Amy */
 #define SPFX_ONLYONE   0x20000000L	/* artifact never spawns again if it was already generated --Amy */
+#define SPFX_SLW_DGST   0x40000000L /* Artifact gives slow digestion - Porkman */
 
 #define SPFX_DBONUS 0x01F00000L	/* attack bonus mask */
 

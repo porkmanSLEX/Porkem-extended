@@ -63,8 +63,8 @@ boolean restore;
 
 	for (otmp = ochain; otmp; otmp = otmp->nobj) {
 
-		/* prevent player from depositing a ton of stuff in a chest somewhere --Amy */
-		if (Has_contents(otmp)) delete_contents(otmp);
+		/* Denerfed bones stuffing -- Porkman */
+	
 
 		if (otmp->cobj)
 		    resetobjs(otmp->cobj,restore);
@@ -93,20 +93,15 @@ boolean restore;
 #ifdef MAIL
 			else if (otmp->otyp == SCR_MAIL) otmp->spe = 1;
 #endif
-			else if (otmp->otyp == EGG) otmp->spe = 0;
-			else if (otmp->otyp == TIN) {
-			    /* make tins of unique monster's meat be empty */
-			    if (otmp->corpsenm >= LOW_PM &&
-				    (mons[otmp->corpsenm].geno & G_UNIQ))
-				otmp->corpsenm = NON_PM;
-			} else if (otmp->otyp == AMULET_OF_YENDOR) {
+			else if (otmp->otyp == EGG) otmp->spe = 0; 
+			    else if (otmp->otyp == AMULET_OF_YENDOR) {
 			    /* no longer the real Amulet */
 			    otmp->otyp = FAKE_AMULET_OF_YENDOR;
 			    curse(otmp);
 			} else if (otmp->otyp == CANDELABRUM_OF_INVOCATION) {
 			    if (otmp->lamplit)
 				end_burn(otmp, TRUE);
-			    otmp->otyp = WAX_CANDLE;
+			    otmp->otyp = MAGIC_CANDLE;
 			    otmp->age = 50L;  /* assume used */
 			    if (otmp->spe > 0)
 				otmp->quan = (long)otmp->spe;
@@ -119,18 +114,12 @@ boolean restore;
 			} else if (otmp->otyp == SPE_BOOK_OF_THE_DEAD) {
 			    otmp->otyp = SPE_BLANK_PAPER;
 			    curse(otmp);
-			} else if (otmp->otyp == WAN_WISHING || otmp->otyp == WAN_ACQUIREMENT) {
-			    otmp->otyp = WAN_NOTHING;
-			} else if (otmp->otyp == MAGIC_LAMP) {
-			    otmp->otyp = TIN_OPENER;
-			} else if (otmp->otyp == SCR_WISHING || otmp->otyp == SCR_ACQUIREMENT) {
-			    otmp->otyp = SCR_AMNESIA;
+		
 			} else if (otmp->oartifact == ART_KEY_OF_LAW ||
 				   otmp->oartifact == ART_KEY_OF_NEUTRALITY ||
 				   otmp->oartifact == ART_KEY_OF_CHAOS ||
 				   otmp->oartifact == ART_NIGHTHORN ||
 				   otmp->oartifact == ART_EYE_OF_THE_BEHOLDER ||
-				   otmp->oartifact == ART_GAUNTLET_KEY ||
 				   otmp->oartifact == ART_HAND_OF_VECNA ||
 				   otmp->oartifact == ART_THIEFBANE) {
 			    /* Guaranteed artifacts become ordinary objects */
@@ -145,20 +134,12 @@ boolean restore;
 			if (otmp) {
 
 				if(!rn2(3)) curse(otmp);
-
-				/* still blessed? Roll for a chance to make it uncursed. --Amy */
-				if(!rn2(3) && otmp->blessed) unbless(otmp);
-
-				/* degrade everything to reduce the # of free stuff the finder will get */
-				if (rn2(2)) {
-					if (otmp->spe > 2) otmp->spe /= 2;
-					else if (otmp->spe > -20) otmp->spe--;
 				}
 
 			}
 		}
 	}
-}
+
 
 STATIC_OVL void
 drop_upon_death(mtmp, cont)
@@ -179,17 +160,12 @@ struct obj *cont;
 
 		if(otmp->otyp == SLIME_MOLD) goodfruit(otmp->spe);
 
-		/* Getting a bag filled with 10 pages of crap is incredibly imbalanced. --Amy */
-		if (Has_contents(otmp)) delete_contents(otmp);
-		/* At least now the late player will have to keep their stuff out in the open,
-		 * which makes the items likely to be cursed. See below for an additional change... */
+		/* Getting a bag filled with 10 pages of crap is incredibly imbalanced. --Porkman loves it */
+		
 
 		if(rn2(5)) curse(otmp);
 
-		/* still blessed? Roll for a chance to make it uncursed. --Amy */
-		if(rn2(5) && otmp->blessed) unbless(otmp);
-
-		if (otmp && rn2(2)) delobj(otmp); /* prevent bones finders from getting everything --Amy */
+		/* No longer prevent bones finders from getting everything --Porkman */
 		else if (mtmp)
 			(void) add_to_minv(mtmp, otmp);
 		else if (cont)
@@ -326,7 +302,7 @@ xchar dnum;
 		strcpy(buf, "WYR");
 	else if (!strcmp(dungeons[u.uz.dnum].dname, "Yendorian Tower"))
 		strcpy(buf, "YEN");
-	else impossible("Error! No bones level identifier found. Please notify Amy about this bug and tell her on which level it occurred.");
+	else impossible("Error! No bones level identifier found. Please notify Porkman about this bug and tell her on which level it occurred.");
 
 	return buf;
 

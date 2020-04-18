@@ -15556,6 +15556,8 @@ boolean knoweverything;
 					pline("Artifact specs: acts as a luckstone when wielded, +5 to-hit and +6 damage, chaotic, convict sacrifice gift."); break;
 				case ART_SUNSWORD:
 					pline("Artifact specs: +5 to-hit and double damage to undead, resist blindness when wielded, lawful."); break;
+				case ART_PORKMAN_S_BALLS_OF_STEEL:
+					pline("Artifact specs: Lots and lots of porky unbalanced effects! Try them out! I won't say what they are in case Amy is reading or she'll have a stroke. Don't let something steal it! Oh, and you can #name this thing, if you find a silver ball..."); break;
 				case ART_SNICKERSNEE:
 					pline("Artifact specs: +8 damage, lawful, samurai sacrifice gift."); break;
 				case ART_SWORD_OF_JUSTICE:

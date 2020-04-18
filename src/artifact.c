@@ -943,24 +943,26 @@ bad_artifact_xtra()
 	} else {
 		return; /* aww, there are no evil artifacts left... so don't make one. Bummer. */
 	}
-
+/* Brought these values up to a chance that actually has a chance of happening -- Porkman */
 	if (otmp) {
 		if (P_MAX_SKILL(get_obj_skill(otmp, TRUE)) == P_ISRESTRICTED) {
 		    unrestrict_weapon_skill(get_obj_skill(otmp, TRUE));
 		} else if (P_MAX_SKILL(get_obj_skill(otmp, TRUE)) == P_UNSKILLED) {
 			unrestrict_weapon_skill(get_obj_skill(otmp, TRUE));
 			P_MAX_SKILL(get_obj_skill(otmp, TRUE)) = P_BASIC;
-		} else if (rn2(2) && P_MAX_SKILL(get_obj_skill(otmp, TRUE)) == P_BASIC) {
+		} else if (rn2(100) && P_MAX_SKILL(get_obj_skill(otmp, TRUE)) == P_BASIC) {
 			P_MAX_SKILL(get_obj_skill(otmp, TRUE)) = P_SKILLED;
-		} else if (!rn2(4) && P_MAX_SKILL(get_obj_skill(otmp, TRUE)) == P_SKILLED) {
+		} else if (rn2(10) && P_MAX_SKILL(get_obj_skill(otmp, TRUE)) == P_SKILLED) {
 			P_MAX_SKILL(get_obj_skill(otmp, TRUE)) = P_EXPERT;
-		} else if (!rn2(10) && P_MAX_SKILL(get_obj_skill(otmp, TRUE)) == P_EXPERT) {
+		} else if (rn2(2) && P_MAX_SKILL(get_obj_skill(otmp, TRUE)) == P_EXPERT) {
 			P_MAX_SKILL(get_obj_skill(otmp, TRUE)) = P_MASTER;
-		} else if (!rn2(100) && P_MAX_SKILL(get_obj_skill(otmp, TRUE)) == P_MASTER) {
+		} else if (!rn2(2) && P_MAX_SKILL(get_obj_skill(otmp, TRUE)) == P_MASTER) {
 			P_MAX_SKILL(get_obj_skill(otmp, TRUE)) = P_GRAND_MASTER;
-		} else if (!rn2(200) && P_MAX_SKILL(get_obj_skill(otmp, TRUE)) == P_GRAND_MASTER) {
+		} else if (!rn2(4) && P_MAX_SKILL(get_obj_skill(otmp, TRUE)) == P_GRAND_MASTER) {
 			P_MAX_SKILL(get_obj_skill(otmp, TRUE)) = P_SUPREME_MASTER;
 		}
+
+/* I'm not sure why Rusmots, whoever they are, have a special case that is exactly the same, but, screw em --porkman */
 
 		if (Race_if(PM_RUSMOT)) {
 			if (P_MAX_SKILL(get_obj_skill(otmp, TRUE)) == P_ISRESTRICTED) {
@@ -1541,11 +1543,11 @@ touch_artifact(obj,mon)
 	if (yours) pline("%s your grasp!", Tobjnam(obj, "evade"));
 	return 0;
     }
-    /* This is a kludge, but I'm not sure where else to put it */
+     /* This is a kludge, but I'm not sure where else to put it */
     if (oart == &artilist[ART_IRON_BALL_OF_LIBERATION]) {
 	if (Role_if(PM_CONVICT) && (!obj->oerodeproof)) {
 	    obj->oerodeproof = TRUE;
-	    obj->owt = 900; /* Magically lightened, but still heavy */
+	    obj->owt = 100; /* Magically lightened, even more so by Porkman-- */
 	}
 
 	if (Punished && (obj != uball)) {
