@@ -10262,18 +10262,18 @@ rerollX:
 					badeffect();
 				}
 				break;
-		} ;
+		} 
 	}
 
 	/* charging is way too overpowered, let's add another "bullshit downside" --Amy * No, let's remove it! Look! It's gone! --Porkman/
 	
 
-	}
+	
 
 	/* particle cannon and one point shoot need "gauge"; since this isn't Elona, we don't have an actual gauge meter,
 	 * so I decided that it just takes 50 turns to reload --Amy 
 	 * No, it doesn't... --Porkman */
-}
+ }
 
 /* #spelldelete command: allows the player to erase the bottommost spell outright, but only if it's a forgotten one */
 int
