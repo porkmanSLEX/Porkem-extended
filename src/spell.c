@@ -3877,9 +3877,8 @@ castanyway:
 	case SPE_FIRE_BOLT:
 	case SPE_HYPER_BEAM:
 	case SPE_PARALYSIS:
-
-			}
-		}
+			
+		
 
 		if (practicantterror && pseudo && pseudo->otyp == SPE_FINGER_OF_DEATH && !u.pract_fodzap) {
 			pline("%s thunders: 'Well wait, I'll shut down your evil spellcasting. Also, for actually casting an unforgivable curse, you have to pay 25000 zorkmids. If you keep misbehaving like that I'll show you some unforgivable curses, I tell you...'", noroelaname());
@@ -9486,9 +9485,8 @@ controlagain:
 		break;
 
 	case SPE_BACKFIRE:
-		pline("You hear Porkman muttering: You're a damn fool for casting this krap!"
+		pline("You hear Porkman muttering: You're a damn fool for casting this krap!");
 		badeffect();
-
 		break;
 
 	case SPE_MAP_LEVEL:
@@ -9965,7 +9963,7 @@ rerollartifactchoice:
 			shank_player();
 			shank_player();
 			shank_player();
-			continue;
+			
 			
 		switch (otmp->oclass) {
 			case WEAPON_CLASS:
@@ -10264,7 +10262,7 @@ rerollX:
 					badeffect();
 				}
 				break;
-		}
+		} ;
 	}
 
 	/* charging is way too overpowered, let's add another "bullshit downside" --Amy * No, let's remove it! Look! It's gone! --Porkman/
